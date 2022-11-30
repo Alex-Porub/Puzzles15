@@ -1,30 +1,52 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  <!-- <NavBar></NavBar> -->
+  <div class="app">
+    <main>
+      <GameTag></GameTag>
+    </main>
+  </div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+<script>
+import GameTag from "@/components/GameTag";
+
+export default {
+  components: { GameTag },
+};
+</script>
+
+<style lang="scss">
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  &__btns {
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    background: #dcf3f3;
+  }
+}
+main {
+  position: relative;
+  padding: 1.5%;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
+.page {
+  position: absolute;
+  inset: 0;
+  padding: 1.5%;
+  background: rgb(255, 253, 239);
+  overflow: auto;
 }
 </style>

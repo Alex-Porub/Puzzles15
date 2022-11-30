@@ -1,4 +1,4 @@
-# vue3-cli-training
+# puzzles15
 
 ## Project setup
 ```
