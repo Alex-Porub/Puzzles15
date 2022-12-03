@@ -1,5 +1,6 @@
 <template>
   <div class="page">
+  <div class="content">
     <h1>15 puzzles</h1>
     <div :class="{ fieldIndikator: true, good: isTrueField }"></div>
     <div :class="{ wrapper: true, trueField: isTrueField }">
@@ -27,6 +28,8 @@
         <div :class="{ popUpCool__content: true, active: isTrueField }"></div>
       </div>
     </div>
+  </div>
+    
   </div>
 </template>
 
@@ -288,31 +291,51 @@ export default {
 
 <style lang="scss" scoped>
 .page {
-  display: flex;
+
+  .content{
+    margin-top: 1.5vh;
+    display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding-top: 5%;
+  align-items: center; 
+  gap: 3vh;
+
+  @media (max-height:660px) {
+    gap: 1.4vh;
+    }
+  }
 
   h1{
     text-align: center;
     font-size: 2.5em;
     color: #2c5383;
+
+    @media (max-height:670px), (max-width:360px) {
+     font-size: 2.1em;
+    }
   }
 
   .fieldIndikator {
     width: 80px;
     height: 80px;
-    margin-top: 20px;
     border: 2px solid black;
     border-radius: 50%;
     background-image: url("/src/sourses/images/icon-thinking-color-982997.png");
     background-position: center;
     background-size: 100%;
     filter: grayscale(0.5) contrast(0.4) brightness(1.2);
-    flex: 0 0 auto;
-    &.good {
-      // background: green;
+    flex: 0 0 auto; 
+
+    @media (max-height:660px) {
+      width: 11vh;
+    height: 11vh;
+    }
+
+    @media (max-width:320px) {
+      width: 20vw;
+    height: 20vw;
+    }
+
+    &.good {   
       background-image: url("/src/sourses/images/icon-smile-743211.png");
       background-position: center;
       background-size: 100%;
@@ -321,8 +344,7 @@ export default {
     }
   }
 
-  .wrapper {
-    margin-top: 30px;
+  .wrapper { 
     width: 400px;
     max-width: 100%;
     display: flex;
@@ -332,13 +354,16 @@ export default {
     background: rgba(128, 128, 128, 0.555);
     box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.39);
 
+    @media (max-height:660px) {
+        width: 60vh;
+    }
+
     &.trueField {
       border-color: #e71775;
       background: #f5bc1fb2;
       box-shadow: 4px 4px 50px 5px #e403689a;
-
       animation: scaleDone 0.5s ease 1;
-      // animation-iteration-count: 1;
+      
     }
     .container {
       width: 100%;
@@ -347,6 +372,8 @@ export default {
       border-radius: 6px;
       position: relative;
       background: rgb(255, 255, 255);
+ 
+
       &.trueField {
         border-color: #e71775;
         animation: swing 0.5s ease 1;
@@ -354,8 +381,7 @@ export default {
     }
   }
 
-  .btns {
-    margin-top: 10px;
+  .btns {  
     width: 400px;
     max-width: 100%;
     display: flex;

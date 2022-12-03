@@ -37,7 +37,7 @@ export default {
 }
 main {
   position: relative;
-  padding: 1.5%;
+  // padding: 1.5%;
   flex: 1 1 auto;
   overflow: hidden;
 }
@@ -45,7 +45,7 @@ main {
 .page {
   position: absolute;
   inset: 0;
-  padding: 1.5%;
+  // padding: 1.5%;
   background: rgb(255, 253, 239);
   overflow: auto;
 }

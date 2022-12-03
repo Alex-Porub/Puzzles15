@@ -30,7 +30,6 @@ export default {
 .puzzle {
   outline: 2px solid rgba(105, 59, 7, 0.384);
   outline-offset: -3px; 
-  // border: 1px solid rgba(105, 59, 7, 0.63);
   width: 25%;
   height: 25%;
   display: flex;
@@ -41,14 +40,12 @@ export default {
   position: absolute;
   user-select: none;
   box-shadow: inset 3px 3px 16px 2px rgba(105, 59, 7, 0.61);
-  // transition: 0.3s;
   transition: all 0.3s linear 0s;
   cursor: pointer;
   touch-action: none;
-  // cursor: url("/src/sourses/cursors/icons8-hand-cursor-75.png"), auto;
 
-  &__filling {
-    // --font-size: calc(100%);
+
+  &__filling { 
     width: 80%;
     height: 80%;
     border-radius: 50%;
@@ -60,9 +57,11 @@ export default {
     font-weight: bold;
     color: rgb(124, 75, 19);
     box-shadow: inset 4px 4px 9px rgba(255, 255, 255, 0.459);
-    @media(max-width:330px){
+    @media(max-width:330px), (width > height) {
       font-size: 1.4em;
     }
+  
+
   }
 }
 </style>
