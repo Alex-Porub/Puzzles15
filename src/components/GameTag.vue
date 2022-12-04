@@ -1,35 +1,34 @@
 <template>
   <div class="page">
-  <div class="content">
-    <h1>15 puzzles</h1>
-    <div :class="{ fieldIndikator: true, good: isTrueField }"></div>
-    <div :class="{ wrapper: true, trueField: isTrueField }">
-      <div :class="{ container: true, trueField: isTrueField }" ref="container">
-        <MyPuzzle
-          v-for="puzzle in puzzles"
-          :puzzle="puzzle"
-          @pointerdown="onMousedown($event, puzzle)"
-          @dragstart="onDragstart"
-          :style="{ transitionDuration: puzzlesTransition + 's' }"
+    <div class="content">
+      <h1>П'ятнашки</h1>
+      <div :class="{ fieldIndikator: true, good: isTrueField }"></div>
+      <div :class="{ wrapper: true, trueField: isTrueField }">
+        <div :class="{ container: true, trueField: isTrueField }" ref="container">
+          <MyPuzzle
+            v-for="puzzle in puzzles"
+            :puzzle="puzzle"
+            @pointerdown="onMousedown($event, puzzle)"
+            @dragstart="onDragstart"
+            :style="{ transitionDuration: puzzlesTransition + 's' }"
+          >
+          </MyPuzzle>
+        </div>
+      </div>
+      <div class="btns">
+        <button class="defaultBut active" @click="defaultState">зібрати</button>
+        <button
+          :class="{ defaultBut: true, active: isShuffleButtonActive }"
+          @click="isShuffleButtonActive ? shuffle() : null"
+          title="shuffle as many times as necessary"
         >
-        </MyPuzzle>
+          перемішати
+        </button>
+        <div :class="{ popUpCool: true, active: true }">
+          <div :class="{ popUpCool__content: true, active: isTrueField }"></div>
+        </div>
       </div>
     </div>
-    <div class="btns">
-      <button class="defaultBut active" @click="defaultState">default</button>
-      <button
-        :class="{ defaultBut: true, active: isShuffleButtonActive }"
-        @click="isShuffleButtonActive ? shuffle() : null"
-        title="shuffle as many times as necessary"
-      >
-        shuffle
-      </button>
-      <div :class="{ popUpCool: true, active: true }">
-        <div :class="{ popUpCool__content: true, active: isTrueField }"></div>
-      </div>
-    </div>
-  </div>
-    
   </div>
 </template>
 
@@ -275,7 +274,7 @@ export default {
 
   watch: {
     field: {
-      handler(newField) {       
+      handler(newField) {
         this.isTrueField = isTrueField(newField);
       },
       deep: true,
@@ -284,33 +283,33 @@ export default {
 
   mounted() {
     this.puzzles = puzzlesDefault;
-    this.defaultState();   
+    this.defaultState();
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .page {
-
-  .content{
-    margin-top: 1.5vh;
+  .content {
+    margin-top: 1.6vh;
     display: flex;
-  flex-direction: column;
-  align-items: center; 
-  gap: 3vh;
+    flex-direction: column;
+    align-items: center;
+    gap: 3vh;
 
-  @media (max-height:660px) {
-    gap: 1.4vh;
+    @media (max-height: 675px) {
+      gap: 1.4vh;
+      margin-top: 0.5vh;
     }
   }
 
-  h1{
+  h1 {
     text-align: center;
     font-size: 2.5em;
     color: #2c5383;
 
-    @media (max-height:670px), (max-width:360px) {
-     font-size: 2.1em;
+    @media (max-height: 670px), (max-width: 360px) {
+      font-size: 2.1em;
     }
   }
 
@@ -323,19 +322,19 @@ export default {
     background-position: center;
     background-size: 100%;
     filter: grayscale(0.5) contrast(0.4) brightness(1.2);
-    flex: 0 0 auto; 
+    flex: 0 0 auto;
 
-    @media (max-height:660px) {
+    @media (max-height: 660px) {
       width: 11vh;
-    height: 11vh;
+      height: 11vh;
     }
 
-    @media (max-width:320px) {
+    @media (max-width: 320px) {
       width: 20vw;
-    height: 20vw;
+      height: 20vw;
     }
 
-    &.good {   
+    &.good {
       background-image: url("/src/sourses/images/icon-smile-743211.png");
       background-position: center;
       background-size: 100%;
@@ -344,7 +343,7 @@ export default {
     }
   }
 
-  .wrapper { 
+  .wrapper {
     width: 400px;
     max-width: 100%;
     display: flex;
@@ -354,8 +353,8 @@ export default {
     background: rgba(128, 128, 128, 0.555);
     box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.39);
 
-    @media (max-height:660px) {
-        width: 60vh;
+    @media (max-height: 680px) {
+      width: 57vh;
     }
 
     &.trueField {
@@ -363,7 +362,6 @@ export default {
       background: #f5bc1fb2;
       box-shadow: 4px 4px 50px 5px #e403689a;
       animation: scaleDone 0.5s ease 1;
-      
     }
     .container {
       width: 100%;
@@ -372,7 +370,6 @@ export default {
       border-radius: 6px;
       position: relative;
       background: rgb(255, 255, 255);
- 
 
       &.trueField {
         border-color: #e71775;
@@ -381,7 +378,7 @@ export default {
     }
   }
 
-  .btns {  
+  .btns {
     width: 400px;
     max-width: 100%;
     display: flex;
@@ -391,22 +388,22 @@ export default {
     gap: 10px;
 
     button {
-      font-size: 1.3em;
-
-      width: 110px;
-      height: 35px;
-      padding: 4px 10px;
+      font-size: 1.23em;
+      text-align: center;
+      min-width: 130px;
+      padding: 6px 2px;
+      line-height: 1em;
       box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.39);
       background-color: #b5ceec;
-      border: 1px solid rgb(119, 119, 119);
+      border: 2px solid #98a9be;
       color: gray;
-      border: none;
       transition: 0.1s;
+      font-weight: bold;
 
       &.active {
         border: 2px solid #587496;
-        color: black;
-        background-color: #91c3ff;
+        color: #354e6d;
+        background-color: #9cc8ff;
 
         &:hover {
           background: #cce3ff;
@@ -520,7 +517,7 @@ export default {
       opacity: 0;
 
       &.active {
-        animation: selfAppearance 1.5s ease 0.5s 1; 
+        animation: selfAppearance 1.5s ease 0.5s 1;
       }
     }
   }
