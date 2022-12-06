@@ -57,18 +57,6 @@ function randomInteger(min, max) {
   return Math.floor(rand);
 }
 
-function isTrueField(field) {
-  let isTrueField = true;
-  for (let row = 0; row <= 3; row++) {
-    for (let col = 0; col <= 3; col++) {
-      let trueNumber = col + 1 + row * 4 !== 16 ? col + 1 + row * 4 : 0;
-      let number = field[row][col];
-      if (trueNumber !== number) isTrueField = false;
-    }
-  }
-  return isTrueField;
-}
-
 export default {
   components: { MyPuzzle },
 
@@ -80,6 +68,7 @@ export default {
       puzzlesTransition: puzzlesTransitionDefault,
       isShuffleButtonActive: true,
       isTrueField: false,
+      emptyCell: {},
     };
   },
 
@@ -108,25 +97,8 @@ export default {
       return false;
     },
 
-    emptyCell() {
-      let row, col;
-      for (let i in this.field) {
-        let findIndex = this.field[i].findIndex((collItem) => collItem === 0);
-        if (findIndex >= 0) {
-          row = parseInt(i);
-          col = findIndex;
-          break;
-        }
-      }
-      return {
-        row: row,
-        col: col,
-      };
-    },
-
     puzzlesNearby(cell) {
       let puzzlesNearby = [];
-
       let variants = [
         this.puzzles.find(
           (puzzle) => puzzle.row === cell.row - 1 && puzzle.col === cell.col
@@ -150,11 +122,11 @@ export default {
       return puzzlesNearby;
     },
 
-    movePuzzle(puzzle, emptyCell) {
+    movePuzzle(puzzle, toCell) {
       let prevRow = puzzle.row;
       let prevCol = puzzle.col;
-      let currentRow = emptyCell.row;
-      let currentCol = emptyCell.col;
+      let currentRow = toCell.row;
+      let currentCol = toCell.col;
       puzzle.row = currentRow;
       puzzle.col = currentCol;
       this.field[prevRow][prevCol] = 0;
@@ -165,7 +137,7 @@ export default {
       this.isShuffleButtonActive = false;
       let shuffleTransition = 0.06;
       this.puzzlesTransition = 0.15;
-      let emptyCell = this.emptyCell();
+      let emptyCell = this.emptyCell;
       let prevRandomPuzzle;
       let i = 1;
       let shuffleInterval = setInterval(() => {
@@ -192,6 +164,7 @@ export default {
       let puzzlesTransitionDefault = this.puzzlesTransitionDefault;
       const movePuzzle = this.movePuzzle;
       let empty = this.isEmptyNearby(puzzle.row, puzzle.col);
+
       if (empty) {
         const element = event.target.closest(".puzzle");
         const elementSize = element.offsetWidth;
@@ -212,25 +185,21 @@ export default {
             case "up":
               if (deltaY > elementSize * 0.35) {
                 movePuzzle(puzzle, { row: puzzle.row - 1, col: puzzle.col, number: 0 });
-                // puzzle.row = puzzle.row - 1;
               } else element.style.top = 25 * puzzle.row + "%";
               break;
             case "right":
               if (-deltaX > elementSize * 0.35) {
                 movePuzzle(puzzle, { row: puzzle.row, col: puzzle.col + 1, number: 0 });
-                // puzzle.col = puzzle.col + 1;
               } else element.style.left = 25 * puzzle.col + "%";
               break;
             case "down":
               if (-deltaY > elementSize * 0.35) {
                 movePuzzle(puzzle, { row: puzzle.row + 1, col: puzzle.col, number: 0 });
-                // puzzle.row = puzzle.row + 1;
               } else element.style.top = 25 * puzzle.row + "%";
               break;
             case "left":
               if (deltaX > elementSize * 0.35) {
                 movePuzzle(puzzle, { row: puzzle.row, col: puzzle.col - 1, number: 0 });
-                // puzzle.col = puzzle.col - 1;
               } else element.style.left = 25 * puzzle.col + "%";
               break;
           }
@@ -241,29 +210,27 @@ export default {
           deltaX = mouseStartX - event.pageX;
           deltaY = mouseStartY - event.pageY;
 
-          if (empty) {
-            switch (empty) {
-              case "up":
-                if (0 < deltaY && deltaY < elementSize) {
-                  element.style.top = computedTop - deltaY + "px";
-                }
-                break;
-              case "right":
-                if (0 > deltaX && -deltaX < elementSize) {
-                  element.style.left = computedLeft - deltaX + "px";
-                }
-                break;
-              case "down":
-                if (0 > deltaY && -deltaY < elementSize) {
-                  element.style.top = computedTop - deltaY + "px";
-                }
-                break;
-              case "left":
-                if (0 < deltaX && deltaX < elementSize) {
-                  element.style.left = computedLeft - deltaX + "px";
-                }
-                break;
-            }
+          switch (empty) {
+            case "up":
+              if (0 < deltaY && deltaY < elementSize) {
+                element.style.top = computedTop - deltaY + "px";
+              }
+              break;
+            case "right":
+              if (0 > deltaX && -deltaX < elementSize) {
+                element.style.left = computedLeft - deltaX + "px";
+              }
+              break;
+            case "down":
+              if (0 > deltaY && -deltaY < elementSize) {
+                element.style.top = computedTop - deltaY + "px";
+              }
+              break;
+            case "left":
+              if (0 < deltaX && deltaX < elementSize) {
+                element.style.left = computedLeft - deltaX + "px";
+              }
+              break;
           }
         }
       }
@@ -275,7 +242,22 @@ export default {
   watch: {
     field: {
       handler(newField) {
-        this.isTrueField = isTrueField(newField);
+        let isTrueField = true;
+        let emptyCell = {};
+        for (let row = 0; row <= 3; row++) {
+          for (let col = 0; col <= 3; col++) {
+            let trueNumber = col + 1 + row * 4 !== 16 ? col + 1 + row * 4 : 0;
+            let number = newField[row][col];
+            if (number === 0) {
+              emptyCell.row = row;
+              emptyCell.col = col;
+            }
+            if (trueNumber !== number) isTrueField = false;
+          }
+        }
+
+        this.isTrueField = isTrueField;
+        this.emptyCell = emptyCell;
       },
       deep: true,
     },
