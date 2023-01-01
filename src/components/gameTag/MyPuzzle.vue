@@ -60,8 +60,6 @@ export default {
     @media(max-width:330px), (width > height) {
       font-size: 1.4em;
     }
-  
-
   }
 }
 </style>
