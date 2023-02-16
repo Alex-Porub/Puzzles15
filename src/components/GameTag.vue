@@ -1,5 +1,5 @@
 <template>
-    <div class="page">
+    <div class="page" :class="{ page: true, [theme]: true }">
         <div class="content">
             <h1>{{ this.textcontent.header[this.lang] }}</h1>
             <div :class="{ fieldIndikator: true, good: isTrueField }"></div>
@@ -11,6 +11,8 @@
                         @pointerdown="onMousedown($event, puzzle)"
                         @dragstart="onDragstart"
                         :style="{ transitionDuration: puzzlesTransition + 's' }"
+                        :theme="this.theme"                        
+                        :key="puzzle.number"
                     >
                     </MyPuzzle>
                 </div>
@@ -30,9 +32,16 @@
                     <div :class="{ popUpCool__content: true, active: isTrueField }"></div>
                 </div>
             </div>
-            <button class="btn btn_showInfo" @click="infoToggle" title="help">?</button>
-            <button class="btn btn_language" @click="langToggle" title="change language">{{ this.lang }}</button>
-            <MyPopUpInfo :infoVisible="infoVisible" :infoToggle="this.infoToggle" :lang="this.lang" />
+            <div class="settings">
+                <button class="settings_btn settings_btn_showInfo" @click="infoToggle" title="show info">?</button>
+                <button :class="{ settings_btn: true, settings_btn_theme: true, [theme]: true }" @click="themeToggle" title="change theme">
+                    <img v-if="theme === 'brightTheme'" src="../sourses/images/icons8-crescent-moon-50.png" />
+                    <img v-else src="../sourses/images/icons8-sun-60.png" />
+                </button>
+                <button class="settings_btn settings_btn_language" @click="langToggle" title="change language">{{ this.lang === "ukr" ? "en":"ukr" }}</button>
+            </div>
+
+            <MyPopUpInfo :infoVisible="infoVisible" :infoToggle="this.infoToggle" :lang="this.lang" :theme="this.theme" />
         </div>
     </div>
 </template>
@@ -94,15 +103,22 @@ export default {
             infoVisible: false,
             lang: "ukr",
             textcontent: textcontent,
+            theme: "brightTheme",
         };
     },
 
     methods: {
+        refToPuzzle(el){
+
+        },
         infoToggle() {
             this.infoVisible = !this.infoVisible;
         },
         langToggle() {
             this.lang = this.lang == "ukr" ? "en" : "ukr";
+        },
+        themeToggle() {
+            this.theme = this.theme == "brightTheme" ? "darkTheme" : "brightTheme";
         },
 
         isEmptyNearby(row, col) {
@@ -323,7 +339,11 @@ export default {
         },
     },
 
-    computed: {},
+    computed: {
+        iconThemeSrc() {
+            return this.theme === "darkTheme" ? "../sourses/images/icons8-crescent-moon-50.png" : "../sourses/images/icons8-sun-60.png";
+        },
+    },
 
     watch: {
         field: {
@@ -350,17 +370,15 @@ export default {
 
     mounted() {
         this.defaultState();
-        this.puzzles.forEach((puzzle) => {
-            puzzle.element = document.querySelector(`.puzzle[data-number="${puzzle.number}"]`);
-        });
     },
 };
 </script>
 
 <style lang="scss" scoped>
 .page {
+    padding: 40px 1% 0 1%;
     .content {
-        margin-top: 1.6vh;
+        margin-top: 1.5vh;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -368,7 +386,10 @@ export default {
 
         @media (max-height: 675px) {
             gap: 1.4vh;
-            margin-top: 0.6vh;
+            margin-top: 0.3vh;
+        }
+        .popUpInfo {
+            z-index: 3;
         }
     }
 
@@ -376,10 +397,11 @@ export default {
         text-align: center;
         font-size: 2.5em;
         color: #2c5383;
+        // margin: 0;
 
         @media (max-height: 670px), (max-width: 360px) {
             font-size: 1.8em;
-            margin-top: 30px;
+            // margin-top: 30px;
             letter-spacing: 0em;
         }
     }
@@ -439,7 +461,7 @@ export default {
             &:before {
                 --height: 200%;
                 --width: 20%;
-                --color:#6899dfc9;
+                --color: #6899dfc9;
                 content: "";
                 position: absolute;
                 width: var(--width);
@@ -495,7 +517,7 @@ export default {
             box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.39);
             background-color: #b5ceec;
             border: 2px solid #98a9be;
-            border-radius: 20px;
+            border-radius: 8px;
             color: gray;
             transition: 0.1s;
             font-weight: bold;
@@ -623,38 +645,101 @@ export default {
         }
     }
 
-    .btn {
+    .settings {
+        display: flex;
+        justify-content: space-between;
         position: absolute;
-        z-index: 5;
-        width: 60px;
-        height: 30px;
-        background: #416592;
-        color: white;
-        border: none;
-        border-radius: 3px;
-        font-size: 25px;
-        font-weight: bold;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.473);
-        cursor: pointer;
+        inset: 4px 1.3vw auto 1.5vw;
+        // border: 1px solid greenyellow;
 
-        &_showInfo {
-            top: 4px;
-            left: 1.5vw;
+        .settings_btn {
+            // position: absolute;
+            z-index: 5;
+            min-width: 60px;
+            min-height: 30px;
+            padding: 1px 6px;
+            background: #416592;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            font-size: 25px;
+            font-weight: bold;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.473);
+            cursor: pointer;
+
+            &_showInfo {
+            }
+
+            &_language {
+                font-size: 22px;
+                font-weight: normal;
+                letter-spacing: 0.05em;
+            }
+
+            &_theme {
+                font-size: 18px;
+                font-weight: 400;
+                letter-spacing: 0.05em;
+                line-height: 0;                
+                padding: 2px 6px;
+
+                img {
+                    height: 30px;
+                }
+
+                &.brightTheme {
+                    background: #a6c2e2;
+                }
+            }
+
+            &:hover {
+                background: white;
+                color: #416592;
+                outline: 3px solid #416592;
+                outline-offset: -2px;
+            }
         }
-        &_language {
-            top: 4px;
-            left: initial;
-            right: 1.5vw;
-            font-size: 22px;
-            font-weight: normal;
-            letter-spacing: 0.05em;
+    }
+
+    &.darkTheme {
+        background: #3f3f3f;
+
+        h1 {
+            color: #d9eaff;
         }
 
-        &:hover {
-            background: white;
-            color: #416592;
-            outline: 3px solid #416592;
-            outline-offset: -2px;
+        .wrapper {
+            --borderColor: #c2bfa6;
+            --borderColorTrue: #eedec8;
+
+            border-color: var(--borderColor);
+            background: rgba(128, 128, 128, 0.555);
+            // box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.39);
+
+            &.trueField {
+                border-color: var(--borderColorTrue);
+                background: #233c5a;
+                box-shadow: 4px 4px 50px 5px #eee7c867;
+
+                &:before {
+                    // --height: 200%;
+                    // --width: 20%;
+                    --color: #ddd018b2;
+                    box-shadow: 0 0 40px 40px var(--color);
+                }
+            }
+
+            .container {
+                border-color: var(--borderColor);
+                border-radius: 6px;
+                position: relative;
+                background: #506681;
+
+                &.trueField {
+                    border-color: var(--borderColorTrue);
+                    // animation: swing 0.5s ease 1;
+                }
+            }
         }
     }
 }
