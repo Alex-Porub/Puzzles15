@@ -11,7 +11,7 @@
                         @pointerdown="onMousedown($event, puzzle)"
                         @dragstart="onDragstart"
                         :style="{ transitionDuration: puzzlesTransition + 's' }"
-                        :theme="this.theme"                        
+                        :theme="this.theme"
                         :key="puzzle.number"
                     >
                     </MyPuzzle>
@@ -38,7 +38,9 @@
                     <img v-if="theme === 'brightTheme'" src="../sourses/images/icons8-crescent-moon-50.png" />
                     <img v-else src="../sourses/images/icons8-sun-60.png" />
                 </button>
-                <button class="settings_btn settings_btn_language" @click="langToggle" title="change language">{{ this.lang === "ukr" ? "en":"ukr" }}</button>
+                <button class="settings_btn settings_btn_language" @click="langToggle" title="change language">
+                    {{ this.lang === "ukr" ? "en" : "ukr" }}
+                </button>
             </div>
 
             <MyPopUpInfo :infoVisible="infoVisible" :infoToggle="this.infoToggle" :lang="this.lang" :theme="this.theme" />
@@ -108,9 +110,7 @@ export default {
     },
 
     methods: {
-        refToPuzzle(el){
-
-        },
+        refToPuzzle(el) {},
         infoToggle() {
             this.infoVisible = !this.infoVisible;
         },
@@ -680,7 +680,7 @@ export default {
                 font-size: 18px;
                 font-weight: 400;
                 letter-spacing: 0.05em;
-                line-height: 0;                
+                line-height: 0;
                 padding: 2px 6px;
 
                 img {

@@ -1,5 +1,14 @@
 <template>
-    <div :class="{ puzzle: true, [theme]: true }" :data-number="puzzle.number" :style="{ top: styleTop, left: styleLeft }" :ref="(el)=>{puzzle.element = el}">
+    <div
+        :class="{ puzzle: true, [theme]: true }"
+        :data-number="puzzle.number"
+        :style="{ top: styleTop, left: styleLeft }"
+        :ref="
+            (el) => {
+                puzzle.element = el;
+            }
+        "
+    >
         <span class="puzzle__filling">
             {{ puzzle.number }}
         </span>
@@ -73,7 +82,7 @@ export default {
             font-weight: 400;
             box-shadow: none;
             box-shadow: 0 0 15px 3px rgb(73, 48, 16), inset 0px 0px 14px 2px #c2bfa6b9;
-            background:  rgb(48, 42, 38);
+            background: rgb(48, 42, 38);
             color: rgb(174, 223, 223);
         }
     }
