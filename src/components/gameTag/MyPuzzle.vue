@@ -5,7 +5,7 @@
         :style="{ top: styleTop, left: styleLeft }"
         :ref="
             (el) => {
-                puzzle.element = el;
+                $emit('emitRef', el);
             }
         "
     >
@@ -27,6 +27,12 @@ export default {
             required: true,
         },
     },
+
+    emits: ["emitRef"],
+
+    data() {
+        return {};
+    },
     computed: {
         styleTop() {
             return 25 * this.puzzle.row + "%";
@@ -35,6 +41,7 @@ export default {
             return 25 * this.puzzle.col + "%";
         },
     },
+    mounted() {},
 };
 </script>
 

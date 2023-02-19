@@ -13,6 +13,7 @@
                         :style="{ transitionDuration: puzzlesTransition + 's' }"
                         :theme="this.theme"
                         :key="puzzle.number"
+                        @emit-ref="puzzle.element = $event"
                     >
                     </MyPuzzle>
                 </div>
