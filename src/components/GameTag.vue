@@ -34,16 +34,14 @@
                 </div>
             </div>
             <div class="settings">
-                <button class="settings_btn settings_btn_showInfo" @click="infoToggle" title="show info">?</button>
+                <button :class="['settings_btn', 'settings_btn_showInfo', theme]" @click="infoToggle" title="show info">?</button>
                 <button :class="{ settings_btn: true, settings_btn_theme: true, [theme]: true }" @click="themeToggle" title="change theme">
-                    <img v-if="theme === 'brightTheme'" src="../sourses/images/icons8-crescent-moon-50.png" />
-                    <img v-else src="../sourses/images/icons8-sun-60.png" />
+                    <img :src="iconThemeSrc" />
                 </button>
-                <button class="settings_btn settings_btn_language" @click="langToggle" title="change language">
+                <button :class="['settings_btn', 'settings_btn_language', theme]" @click="langToggle" title="change language">
                     {{ this.lang === "ukr" ? "en" : "ukr" }}
                 </button>
             </div>
-
             <MyPopUpInfo :infoVisible="infoVisible" :infoToggle="this.infoToggle" :lang="this.lang" :theme="this.theme" />
         </div>
     </div>
@@ -52,6 +50,8 @@
 <script>
 import MyPuzzle from "@/components/gameTag/MyPuzzle.vue";
 import MyPopUpInfo from "@/components/gameTag/MyPopUpInfo.vue";
+import iconSrc_moon from "@/sourses/images/icons8-crescent-moon-50.png";
+import iconSrc_sun from "@/sourses/images/icons8-sun-60.png";
 
 // helper
 function randomInteger(min, max) {
@@ -66,7 +66,7 @@ const puzzlesDefault = (() => {
     const puzzlesDefault = [];
     for (let i = 1; i <= 15; i++) {
         const puzzle = {};
-        puzzle.number = i; 
+        puzzle.number = i;
         puzzlesDefault.push(puzzle);
     }
     return puzzlesDefault;
@@ -118,14 +118,6 @@ export default {
             this.theme = this.theme == "brightTheme" ? "darkTheme" : "brightTheme";
         },
 
-        // isEmptyNearby(row, col) {
-        //     if (row > 0 && this.field[row - 1][col] === 0) return "up";
-        //     else if (col < 3 && this.field[row][col + 1] === 0) return "right";
-        //     else if (row < 3 && this.field[row + 1][col] === 0) return "down";
-        //     else if (col > 0 && this.field[row][col - 1] === 0) return "left";
-        //     return false;
-        // },
-
         // adds an index to array of puzzle indexes to move
         pushIndexToMove(index) {
             this.indexesToMove.push(index);
@@ -133,7 +125,8 @@ export default {
             this.puzzles[index].computedTop = parseInt(getComputedStyle(this.puzzles[index].element).top);
         },
 
-        // detects if is there any empty cell in the column or the row to move puzzles to
+        // Detects if is there any empty cell in the column or the row to move puzzles to.
+        // Tt also finds puzzles need to be moved
         emptyInAccess(row, col) {
             const empty_col = this.emptyCell.col;
             const empty_row = this.emptyCell.row;
@@ -229,15 +222,15 @@ export default {
             }
         },
 
-        // moves one of the closest puzzles to an empty cell a predetermined number of times, shuffling the puzzles
+        // moves one of the closest puzzles to an empty cell a predetermined (variable 'deep') number of times, shuffling the puzzles
         shuffle(deep = 20) {
             this.onShuffle = true;
-            let shuffleTransition = 0.09;
-            this.puzzlesTransition = 0.11;
-            let emptyCell = this.emptyCell;
+            const shuffleTransition = 0.09; /*sec*/
+            this.puzzlesTransition = 0.11; /*sec*/
+            const emptyCell = this.emptyCell;
             let prevRandomPuzzle;
             let i = 0;
-            let shuffleInterval = setInterval(() => {
+            const shuffleInterval = setInterval(() => {
                 i++;
                 let puzzlesBeside = this.puzzlesBeside(emptyCell);
                 if (i > 1) puzzlesBeside = puzzlesBeside.filter((puzzle) => puzzle.number !== prevRandomPuzzle.number);
@@ -267,10 +260,10 @@ export default {
                 const mouseStartX = event.pageX;
                 const mouseStartY = event.pageY;
                 let deltaX, deltaY;
-
                 document.addEventListener("pointermove", onMousemove);
                 document.addEventListener("pointerup", onMouseup, { once: true });
 
+                //moves the puzzle together with the pointer
                 function onMousemove(event) {
                     puzzlesToMove.forEach((puzzleToMove) => {
                         puzzleToMove.element.style.transition = "none";
@@ -297,6 +290,8 @@ export default {
                     }
                 }
 
+                // When releasing the pointer, if pointer moved up the puzzles behind the "boundaryLine" ,
+                // this means that the puzzles need to change the location. Otherwise -  they must return.
                 function onMouseup() {
                     document.removeEventListener("pointermove", onMousemove);
                     puzzlesToMove.forEach((puzzleToMove) => {
@@ -329,7 +324,7 @@ export default {
 
     computed: {
         iconThemeSrc() {
-            return this.theme === "darkTheme" ? "../sourses/images/icons8-crescent-moon-50.png" : "../sourses/images/icons8-sun-60.png";
+            return this.theme === "darkTheme" ? iconSrc_sun : iconSrc_moon;
         },
     },
 
@@ -638,45 +633,35 @@ export default {
         justify-content: space-between;
         position: absolute;
         inset: 4px 1.3vw auto 1.5vw;
-        // border: 1px solid greenyellow;
 
         .settings_btn {
-            // position: absolute;
             z-index: 5;
             min-width: 60px;
             min-height: 30px;
-            padding: 1px 6px;
+            padding: 2px;
             background: #416592;
             color: white;
             border: none;
             border-radius: 3px;
-            font-size: 25px;
-            font-weight: bold;
+            font-size: 29px;
+            font-weight: 400;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.473);
+            line-height: 0;
             cursor: pointer;
 
-            &_showInfo {
+            &.brightTheme {
+                background: #a6c2e2;
+                color: #3a5b83;
+                font-weight: bold;
             }
 
             &_language {
-                font-size: 22px;
-                font-weight: normal;
-                letter-spacing: 0.05em;
+                font-size: 24px;
             }
 
             &_theme {
-                font-size: 18px;
-                font-weight: 400;
-                letter-spacing: 0.05em;
-                line-height: 0;
-                padding: 2px 6px;
-
                 img {
                     height: 30px;
-                }
-
-                &.brightTheme {
-                    background: #a6c2e2;
                 }
             }
 
@@ -702,7 +687,6 @@ export default {
 
             border-color: var(--borderColor);
             background: rgba(128, 128, 128, 0.555);
-            // box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.39);
 
             &.trueField {
                 border-color: var(--borderColorTrue);
@@ -710,8 +694,6 @@ export default {
                 box-shadow: 4px 4px 50px 5px #eee7c867;
 
                 &:before {
-                    // --height: 200%;
-                    // --width: 20%;
                     --color: #ddd018b2;
                     box-shadow: 0 0 40px 40px var(--color);
                 }
@@ -725,7 +707,6 @@ export default {
 
                 &.trueField {
                     border-color: var(--borderColorTrue);
-                    // animation: swing 0.5s ease 1;
                 }
             }
         }
