@@ -9,7 +9,7 @@
                         v-for="puzzle in puzzles"
                         :puzzle="puzzle"
                         @pointerdown="onMousedown($event, puzzle)"
-                        @dragstart="onDragstart"
+                        @dragstart="() => false"
                         :style="{ transitionDuration: puzzlesTransition + 's' }"
                         :theme="this.theme"
                         :key="puzzle.number"
@@ -53,27 +53,24 @@
 import MyPuzzle from "@/components/gameTag/MyPuzzle.vue";
 import MyPopUpInfo from "@/components/gameTag/MyPopUpInfo.vue";
 
-function makePuzzlesDefault() {
-    let puzzlesDefault = [];
+// helper
+function randomInteger(min, max) {
+    const rand = min + Math.random() * (max + 1 - min);
+    return Math.floor(rand);
+}
+
+const puzzlesTransitionDefault = 0.1;
+
+// creates the default puzzle array
+const puzzlesDefault = (() => {
+    const puzzlesDefault = [];
     for (let i = 1; i <= 15; i++) {
-        let row = Math.floor((i - 1) / 4);
-        let col = (i - 1) % 4;
-        let puzzle = {};
-        puzzle.number = i;
-        puzzle.row = row;
-        puzzle.col = col;
+        const puzzle = {};
+        puzzle.number = i; 
         puzzlesDefault.push(puzzle);
     }
     return puzzlesDefault;
-}
-
-const puzzlesDefault = makePuzzlesDefault();
-const puzzlesTransitionDefault = 0.1;
-
-function randomInteger(min, max) {
-    let rand = min + Math.random() * (max + 1 - min);
-    return Math.floor(rand);
-}
+})();
 
 const textcontent = {
     header: {
@@ -111,7 +108,6 @@ export default {
     },
 
     methods: {
-        refToPuzzle(el) {},
         infoToggle() {
             this.infoVisible = !this.infoVisible;
         },
@@ -122,33 +118,37 @@ export default {
             this.theme = this.theme == "brightTheme" ? "darkTheme" : "brightTheme";
         },
 
-        isEmptyNearby(row, col) {
-            if (row > 0 && this.field[row - 1][col] === 0) return "up";
-            else if (col < 3 && this.field[row][col + 1] === 0) return "right";
-            else if (row < 3 && this.field[row + 1][col] === 0) return "down";
-            else if (col > 0 && this.field[row][col - 1] === 0) return "left";
-            return false;
-        },
+        // isEmptyNearby(row, col) {
+        //     if (row > 0 && this.field[row - 1][col] === 0) return "up";
+        //     else if (col < 3 && this.field[row][col + 1] === 0) return "right";
+        //     else if (row < 3 && this.field[row + 1][col] === 0) return "down";
+        //     else if (col > 0 && this.field[row][col - 1] === 0) return "left";
+        //     return false;
+        // },
 
+        // adds an index to array of puzzle indexes to move
         pushIndexToMove(index) {
             this.indexesToMove.push(index);
             this.puzzles[index].computedLeft = parseInt(getComputedStyle(this.puzzles[index].element).left);
             this.puzzles[index].computedTop = parseInt(getComputedStyle(this.puzzles[index].element).top);
         },
 
+        // detects if is there any empty cell in the column or the row to move puzzles to
         emptyInAccess(row, col) {
-            let empty_col = this.emptyCell.col;
-            let empty_row = this.emptyCell.row;
+            const empty_col = this.emptyCell.col;
+            const empty_row = this.emptyCell.row;
 
             if (row === empty_row) {
-                for (let i = col; Math.abs(i - empty_col) > 0; i = i + (empty_col - i) / Math.abs(empty_col - i)) {
-                    let index = this.puzzles.findIndex((puz) => puz.row === row && puz.col === i);
+                const increment = empty_col - col > 0 ? 1 : -1;
+                for (let i = col; Math.abs(i - empty_col) > 0; i += increment) {
+                    const index = this.puzzles.findIndex((puz) => puz.row === row && puz.col === i);
                     this.pushIndexToMove(index);
                 }
                 return col > empty_col ? "left" : "right";
             } else if (col === empty_col) {
-                for (let i = row; Math.abs(i - empty_row) > 0; i = i + (empty_row - i) / Math.abs(empty_row - i)) {
-                    let index = this.puzzles.findIndex((puz) => puz.col === col && puz.row === i);
+                const increment = empty_row - row > 0 ? 1 : -1;
+                for (let i = row; Math.abs(i - empty_row) > 0; i += increment) {
+                    const index = this.puzzles.findIndex((puz) => puz.col === col && puz.row === i);
                     this.pushIndexToMove(index);
                 }
                 return row > empty_row ? "up" : "down";
@@ -157,11 +157,12 @@ export default {
             return false;
         },
 
+        // sets puzzles in default positions
         defaultState() {
             this.puzzles.forEach((puzzle) => {
-                let i = puzzle.number;
-                let row = Math.floor((i - 1) / 4);
-                let col = (i - 1) % 4;
+                const i = puzzle.number;
+                const row = Math.floor((i - 1) / 4);
+                const col = (i - 1) % 4;
                 puzzle.row = row;
                 puzzle.col = col;
                 this.field[row][col] = i;
@@ -169,45 +170,45 @@ export default {
             this.field[3][3] = 0;
         },
 
-        onDragstart() {
-            return false;
-        },
-
-        puzzlesNearby(cell) {
-            let puzzlesNearby = [];
-            let variants = [
+        // defines puzzles beside an empty cell
+        puzzlesBeside(cell) {
+            const puzzlesBeside = [];
+            const applicants = [
                 this.puzzles.find((puzzle) => puzzle.row === cell.row - 1 && puzzle.col === cell.col),
                 this.puzzles.find((puzzle) => puzzle.row === cell.row && puzzle.col === cell.col + 1),
                 this.puzzles.find((puzzle) => puzzle.row === cell.row + 1 && puzzle.col === cell.col),
                 this.puzzles.find((puzzle) => puzzle.row === cell.row && puzzle.col === cell.col - 1),
             ];
 
-            for (let puzzle of variants) {
-                if (puzzle) {
-                    puzzlesNearby.push(puzzle);
+            for (let applicant of applicants) {
+                if (applicant) {
+                    puzzlesBeside.push(applicant);
                 }
             }
-            return puzzlesNearby;
+            return puzzlesBeside;
         },
 
+        // moves the puzzle to the cell
         movePuzzle(puzzle, toCell) {
-            let prevRow = puzzle.row;
-            let prevCol = puzzle.col;
-            let currentRow = toCell.row;
-            let currentCol = toCell.col;
+            const prevRow = puzzle.row;
+            const prevCol = puzzle.col;
+            const currentRow = toCell.row;
+            const currentCol = toCell.col;
             puzzle.row = currentRow;
             puzzle.col = currentCol;
             this.field[prevRow][prevCol] = 0;
             this.field[currentRow][currentCol] = puzzle.number;
         },
 
+        // moves the puzzles in the direction
         movePuzzles(puzzles, direction) {
-            let prevRow = puzzles[0].row;
-            let prevCol = puzzles[0].col;
+            const prevRow = puzzles[0].row;
+            const prevCol = puzzles[0].col;
             this.field[prevRow][prevCol] = 0;
-            for (let i = 0; i < puzzles.length; i++) {
-                let currentRow = puzzles[i].row;
-                let currentCol = puzzles[i].col;
+
+            for (let puzzle of puzzles) {
+                let currentRow = puzzle.row;
+                let currentCol = puzzle.col;
                 switch (direction) {
                     case "up":
                         currentRow--;
@@ -222,12 +223,13 @@ export default {
                         currentCol--;
                         break;
                 }
-                puzzles[i].row = currentRow;
-                puzzles[i].col = currentCol;
-                this.field[currentRow][currentCol] = puzzles[i].number;
+                puzzle.row = currentRow;
+                puzzle.col = currentCol;
+                this.field[currentRow][currentCol] = puzzle.number;
             }
         },
 
+        // moves one of the closest puzzles to an empty cell a predetermined number of times, shuffling the puzzles
         shuffle(deep = 20) {
             this.onShuffle = true;
             let shuffleTransition = 0.09;
@@ -237,9 +239,9 @@ export default {
             let i = 0;
             let shuffleInterval = setInterval(() => {
                 i++;
-                let puzzlesNearby = this.puzzlesNearby(emptyCell);
-                if (i > 1) puzzlesNearby = puzzlesNearby.filter((puzzle) => puzzle.number !== prevRandomPuzzle.number);
-                let randomPuzzle = puzzlesNearby[randomInteger(0, puzzlesNearby.length - 1)];
+                let puzzlesBeside = this.puzzlesBeside(emptyCell);
+                if (i > 1) puzzlesBeside = puzzlesBeside.filter((puzzle) => puzzle.number !== prevRandomPuzzle.number);
+                let randomPuzzle = puzzlesBeside[randomInteger(0, puzzlesBeside.length - 1)];
                 prevRandomPuzzle = { ...randomPuzzle };
                 this.movePuzzle(randomPuzzle, emptyCell);
                 emptyCell.row = prevRandomPuzzle.row;
@@ -256,8 +258,8 @@ export default {
             const puzzlesTransitionDefault = this.puzzlesTransitionDefault;
             const movePuzzles = this.movePuzzles;
             const indexesToMove = this.indexesToMove;
-            const puzzles = this.puzzles;
             const empty = this.emptyInAccess(puzzle.row, puzzle.col);
+            const puzzlesToMove = indexesToMove.map((index) => this.puzzles[index]);
 
             if (empty) {
                 const element = puzzle.element;
@@ -270,67 +272,52 @@ export default {
                 document.addEventListener("pointerup", onMouseup, { once: true });
 
                 function onMousemove(event) {
-                    indexesToMove.forEach((index) => {
-                        puzzles[index].element.style.transition = "none";
+                    puzzlesToMove.forEach((puzzleToMove) => {
+                        puzzleToMove.element.style.transition = "none";
                     });
                     deltaX = mouseStartX - event.pageX;
                     deltaY = mouseStartY - event.pageY;
 
-                    switch (empty) {
-                        case "up":
-                            if (0 < deltaY && deltaY < elementSize) {
-                                indexesToMove.forEach((index) => {
-                                    puzzles[index].element.style.top = puzzles[index].computedTop - deltaY + "px";
-                                });
+                    const motion =
+                        (0 < deltaY && deltaY < elementSize && empty == "up") || (0 > deltaY && -deltaY < elementSize && empty == "down")
+                            ? "vertical"
+                            : (0 > deltaX && -deltaX < elementSize && empty == "right") ||
+                              (0 < deltaX && deltaX < elementSize && empty == "left")
+                            ? "horizontal"
+                            : false;
+
+                    if (motion) {
+                        puzzlesToMove.forEach((puzzleToMove) => {
+                            if (motion == "vertical") {
+                                puzzleToMove.element.style.top = puzzleToMove.computedTop - deltaY + "px";
+                            } else {
+                                puzzleToMove.element.style.left = puzzleToMove.computedLeft - deltaX + "px";
                             }
-                            break;
-                        case "right":
-                            if (0 > deltaX && -deltaX < elementSize) {
-                                indexesToMove.forEach((index) => {
-                                    puzzles[index].element.style.left = puzzles[index].computedLeft - deltaX + "px";
-                                });
-                            }
-                            break;
-                        case "down":
-                            if (0 > deltaY && -deltaY < elementSize) {
-                                indexesToMove.forEach((index) => {
-                                    puzzles[index].element.style.top = puzzles[index].computedTop - deltaY + "px";
-                                });
-                            }
-                            break;
-                        case "left":
-                            if (0 < deltaX && deltaX < elementSize) {
-                                indexesToMove.forEach((index) => {
-                                    puzzles[index].element.style.left = puzzles[index].computedLeft - deltaX + "px";
-                                });
-                            }
-                            break;
+                        });
                     }
                 }
 
                 function onMouseup() {
                     document.removeEventListener("pointermove", onMousemove);
-
-                    indexesToMove.forEach((index) => {
-                        puzzles[index].element.style.transition = `all ${puzzlesTransitionDefault}s linear 0s`;
+                    puzzlesToMove.forEach((puzzleToMove) => {
+                        puzzleToMove.element.style.transition = `all ${puzzlesTransitionDefault}s linear 0s`;
                     });
-                    let puzzlesToMove = indexesToMove.map((index) => puzzles[index]);
+                    const boundaryLine = elementSize * 0.35;
 
-                    if (empty === "up" && !(deltaY > elementSize * 0.35)) {
-                        indexesToMove.forEach((index) => {
-                            puzzles[index].element.style.top = puzzles[index].computedTop + "px";
-                        });
-                    } else if (empty === "right" && !(-deltaX > elementSize * 0.35)) {
-                        indexesToMove.forEach((index) => {
-                            puzzles[index].element.style.left = puzzles[index].computedLeft + "px";
-                        });
-                    } else if (empty === "down" && !(-deltaY > elementSize * 0.35)) {
-                        indexesToMove.forEach((index) => {
-                            puzzles[index].element.style.top = puzzles[index].computedTop + "px";
-                        });
-                    } else if (empty === "left" && !(deltaX > elementSize * 0.35)) {
-                        indexesToMove.forEach((index) => {
-                            puzzles[index].element.style.left = puzzles[index].computedLeft + "px";
+                    const takeBack =
+                        (empty === "up" && !(deltaY > boundaryLine)) || (empty === "down" && !(-deltaY > boundaryLine))
+                            ? "vertical"
+                            : (empty === "right" && !(-deltaX > boundaryLine)) || (empty === "left" && !(deltaX > boundaryLine))
+                            ? "horizontal"
+                            : false;
+
+                    if (takeBack) {
+                        puzzlesToMove.forEach((puzzleToMove) => {
+                            if (takeBack == "vertical") {
+                                puzzleToMove.element.style.top = 25 * puzzleToMove.row + "%";
+                            } else {
+                                puzzleToMove.element.style.left = 25 * puzzleToMove.col + "%";
+                            }
                         });
                     } else movePuzzles(puzzlesToMove, empty);
 

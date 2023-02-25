@@ -62,6 +62,7 @@ export default {
     transition: all 0.3s linear 0s;
     cursor: pointer;
     touch-action: none;
+    will-change: top, left;
 
     &__filling {
         width: 80%;
